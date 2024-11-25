@@ -1,0 +1,166 @@
+﻿@{
+    ViewData["Title"] = "Highcharts";
+}
+<h3 style="text-align: center; font-family: 'Arial', sans-serif; font-weight: bold; color: #444; margin-bottom: 20px;">
+    Highcharts in MVC
+</h3>
+
+<!-- First Row: Bar Chart and Pie Chart -->
+<div style="display: flex; justify-content: space-between; gap: 2%; background-color: #78866b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <div id="ContainerBar" style="width: 50%; height: 350px; background: #fff; border-radius: 10px; padding: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"></div>
+    <div id="ContainerPie" style="width: 50%; height: 350px; background: #fff; border-radius: 10px; padding: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"></div>
+</div>
+
+<!-- Second Row: Line Chart -->
+<div style="display: flex; justify-content: center; margin-top: 20px; background-color: #78866b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <div id="ContainerLine" style="width: 100%; height: 350px; background: #fff; border-radius: 10px; padding: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"></div>
+</div>
+
+<script>
+    // Fetch chart data from the server and render the charts
+    async function loadHighcharts() {
+        try {
+            // Fetch data from the server
+            const response = await fetch("/Home/GetChartData");
+            const data = await response.json();
+
+            // Prepare data for the bar chart
+            const categories = data.map(item => item.months);
+            const salesData = data.map(item => item.salesAmount);
+
+            // Render Highcharts bar chart
+            Highcharts.chart('ContainerBar', {
+                chart: {
+                    type: 'column',
+                    backgroundColor: '#010b13',
+                    borderRadius: 10
+                },
+                title: {
+                    text: 'Monthly Sales Data',
+                    style: { color: '#888', fontWeight: 'bold', fontSize: '16px' }
+                },
+
+                plotOptions: {
+                    column: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b> {point.y}</b>',
+                            style: { color: '#888' }
+                        }
+                    }
+                },
+                xAxis: {
+                    categories: categories,
+                    title: { text: 'Months', style: { color: '#888' } },
+                    labels: { style: { color: '#888' } }
+                },
+                yAxis: {
+                    min: 0,
+                    title: { text: 'Sales Amount', style: { color: '#888' } },
+                    labels: { style: { color: '#888' } }
+                },
+
+                tooltip: {
+                    backgroundColor: '#fff',
+                    borderColor: '#ccc',
+                    style: { color: '#333' },
+                    pointFormat: '<b>{point.y:.2f}</b>'
+                },
+                series: [{
+                    name: 'Sales',
+                    data: salesData,
+                    color: '#007bff'
+                }]
+            });
+
+            // Prepare data for the pie chart
+            const pieData = data.map(item => ({
+                name: item.months,
+                y: item.salesAmount
+            }));
+
+            // Render Highcharts pie chart
+            Highcharts.chart('ContainerPie', {
+                chart: {
+                    type: 'pie',
+                    backgroundColor: '#010b13',
+                    borderRadius: 10
+                },
+                title: {
+                    text: 'Sales Distribution by Month',
+                    style: { color: '#888', fontWeight: 'bold', fontSize: '16px' }
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                            style: { color: '#888' }
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    borderColor: '#ccc',
+                    style: { color: '#333' },
+                    pointFormat: '<b>{point.name}</b>: {point.y:.2f}'
+                },
+                series: [{
+                    name: 'Sales',
+                    colorByPoint: true,
+                    data: pieData
+                }]
+            });
+
+            // Prepare data for the line chart
+            const lineData = data.map(item => item.salesAmount);
+
+            // Render Highcharts line chart
+            Highcharts.chart('ContainerLine', {
+                chart: {
+                    type: 'line',
+                    backgroundColor: '#010b13',
+                    borderRadius: 10
+                },
+                title: {
+                    text: 'Sales Trends Over Months',
+                    style: { color: '#888', fontWeight: 'bold', fontSize: '16px' }
+                },
+                xAxis: {
+                    categories: categories,
+                    title: { text: 'Months', style: { color: '#888' } },
+                    labels: { style: { color: '#888' } }
+                },
+                yAxis: {
+                    min: 0,
+                    title: { text: 'Sales Amount', style: { color: '#888' } },
+                    labels: { style: { color: '#888' } }
+                },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    borderColor: '#ccc',
+                    style: { color: '#333' },
+                    pointFormat: '<b>{point.y:.2f}</b>'
+                },
+                series: [{
+                    name: 'Sales Trend',
+                    data: lineData,
+                    color: '#00FFFF', // Tomato color for the line
+                    marker: {
+                        radius: 5
+                    }
+                }]
+            });
+
+        } catch (error) {
+            console.error('Error loading chart data:', error);
+        }
+    }
+
+    // Initialize the charts
+    loadHighcharts();
+</script>
